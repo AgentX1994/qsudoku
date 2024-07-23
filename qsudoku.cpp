@@ -1,3 +1,4 @@
+#include <QDebug>
 #include <QMessageBox>
 
 #include "qsudoku.h"
@@ -17,11 +18,17 @@ struct CheckResult
 };
 
 QSudoku::QSudoku(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::QSudoku), m_grid({0})
+    : QMainWindow(parent),
+      ui(new Ui::QSudoku),
+      m_grid({0}),
+      errorPalette(QGuiApplication::palette()),
+      winPalette(QGuiApplication::palette())
 {
     const QList<QComboBox *> initVector(GRID_SIZE, nullptr);
     m_fields = QList<QList<QComboBox *>>(GRID_SIZE, initVector);
     ui->setupUi(this);
+    errorPalette.setColor(QPalette::Window, Qt::red);
+    winPalette.setColor(QPalette::Window, Qt::green);
 
     const QStringList ITEMS = {
         "", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
@@ -68,11 +75,12 @@ void QSudoku::checkForWin()
     uint64_t goodBoxes = 0;
 
     // Clear all background colors of cells
+    qDebug() << "Setting all cells to original palette";
     for (auto row : m_fields)
     {
         for (auto cell : row)
         {
-            cell->setStyleSheet("");
+            cell->setPalette(QGuiApplication::palette());
         }
     }
 
@@ -131,7 +139,8 @@ void QSudoku::checkForWin()
                     uint8_t digit = m_grid[row * GRID_SIZE + col];
                     if (digit == num)
                     {
-                        m_fields[row][col]->setStyleSheet("background-color: red");
+                        qDebug() << "Setting " << row << ", " << col << " to error";
+                        m_fields[row][col]->setPalette(errorPalette);
                     }
                 }
             }
@@ -168,7 +177,8 @@ void QSudoku::checkForWin()
                     uint8_t digit = m_grid[row * GRID_SIZE + col];
                     if (digit == num)
                     {
-                        m_fields[row][col]->setStyleSheet("background-color: red");
+                        qDebug() << "Setting " << row << ", " << col << " to error";
+                        m_fields[row][col]->setPalette(errorPalette);
                     }
                 }
             }
@@ -217,7 +227,8 @@ void QSudoku::checkForWin()
                             uint8_t digit = m_grid[realRow * GRID_SIZE + realCol];
                             if (digit == num)
                             {
-                                m_fields[realRow][realCol]->setStyleSheet("background-color: red");
+                                qDebug() << "Setting " << realRow << ", " << realCol << " to error";
+                                m_fields[realRow][realCol]->setPalette(errorPalette);
                             }
                         }
                     }
@@ -232,11 +243,12 @@ void QSudoku::checkForWin()
 
     if (goodCols == 9 && goodRows == 9 && goodBoxes == 9)
     {
+        qDebug() << "Setting all cells to win";
         for (auto row : m_fields)
         {
             for (auto cell : row)
             {
-                cell->setStyleSheet("background-color: green");
+                cell->setPalette(winPalette);
             }
         }
         QMessageBox::information(this, "Win!", "You Win!");

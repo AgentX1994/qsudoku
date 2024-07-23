@@ -30,5 +30,7 @@ private:
     Ui::QSudoku *ui;
     QList<QList<QComboBox *>> m_fields;
     std::array<uint8_t, TOTAL_CELLS> m_grid;
+    QPalette errorPalette;
+    QPalette winPalette;
 };
 #endif // QSUDOKU_H
